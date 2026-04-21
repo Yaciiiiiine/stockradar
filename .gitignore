@@ -47,3 +47,7 @@ dev.db
 dev.db-journal
 *.db-shm
 *.db-wal
+
+# logs (non versionnés, voir ARCHITECTURE.md)
+logs/*.json
+logs/*.log
