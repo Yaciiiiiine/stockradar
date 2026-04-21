@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Subscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  token     String   @unique @default(cuid())
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model DailyBrief {
+  id        String       @id @default(cuid())
+  date      String
+  type      String
+  summary   String?
+  stocks    StockEntry[]
+  createdAt DateTime     @default(now())
+
+  @@unique([date, type])
+}
+
+model StockEntry {
+  id        String     @id @default(cuid())
+  briefId   String
+  brief     DailyBrief @relation(fields: [briefId], references: [id], onDelete: Cascade)
+  ticker    String
+  name      String
+  market    String
+  price     Float
+  change    Float
+  reason    String
+  preMarket Float?
+  volume    Float?
+  createdAt DateTime   @default(now())
+}
