@@ -35,6 +35,9 @@ yarn-error.log*
 .env.local
 .env.*.local
 
+# copies de sauvegarde d'éditeur (.env.local.save, etc.)
+*.save
+
 # vercel
 .vercel
 
