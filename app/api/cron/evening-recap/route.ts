@@ -1,14 +1,24 @@
 import { prisma } from "@/lib/prisma";
 import { getEveningStocks } from "@/lib/stocks";
-import { sendEveningRecap } from "@/lib/email";
+import { sendEveningRecap, MissingApiKeyError } from "@/lib/email";
 import { format } from "date-fns";
 import { isAuthorized, unauthorized } from "@/lib/auth";
 import { logCronStart } from "@/lib/cron-schedule";
+import { guardCronEnv, warnIfCronSecretMissing } from "@/lib/env-guard";
+import { writeAlert } from "@/lib/logger";
+
+const JOB = "evening-recap";
 
 export async function GET(request: Request) {
-  if (!isAuthorized(request)) return unauthorized();
+  if (!isAuthorized(request)) {
+    warnIfCronSecretMissing(JOB);
+    return unauthorized();
+  }
 
-  logCronStart("evening-recap");
+  logCronStart(JOB);
+
+  const configError = guardCronEnv(JOB);
+  if (configError) return configError;
 
   const today = format(new Date(), "yyyy-MM-dd");
 
@@ -17,7 +27,13 @@ export async function GET(request: Request) {
       where: { date_type: { date: today, type: "evening" } },
     });
     if (existing) {
-      return Response.json({ message: "Evening recap already exists for today", date: today });
+      return Response.json({
+        success: true,
+        skipped: "already_exists",
+        message: "Evening recap already exists for today",
+        date: today,
+        email: { targeted: 0, sent: 0, failed: 0, errors: [] },
+      });
     }
 
     const { fr, us, summary } = await getEveningStocks();
@@ -47,21 +63,41 @@ export async function GET(request: Request) {
       where: { verified: true },
     });
 
-    if (subscribers.length > 0) {
-      const tokens = new Map(subscribers.map((s) => [s.email, s.token]));
-      const emails = subscribers.map((s) => s.email);
-      const dateLabel = format(new Date(), "d MMMM yyyy");
-      await sendEveningRecap(emails, tokens, dateLabel, fr, us, summary);
+    const tokens = new Map(subscribers.map((s) => [s.email, s.token]));
+    const emails = subscribers.map((s) => s.email);
+    const dateLabel = format(new Date(), "d MMMM yyyy");
+
+    const email = await sendEveningRecap(
+      emails,
+      tokens,
+      dateLabel,
+      fr,
+      us,
+      summary
+    );
+
+    if (email.failed > 0) {
+      writeAlert(
+        "EMAIL_SEND_FAILED",
+        `${JOB} — ${email.failed}/${email.targeted} envois en échec : ${email.errors.join(" | ")}`
+      );
     }
 
     return Response.json({
-      success: true,
+      success: email.failed === 0,
       date: today,
       briefId: brief.id,
       stocksCount: allStocks.length,
-      emailsSent: subscribers.length,
+      email,
     });
   } catch (err) {
+    if (err instanceof MissingApiKeyError) {
+      writeAlert("CONFIG_MISSING", `${JOB} — ${err.message}`);
+      return Response.json(
+        { error: "Configuration incomplète", job: JOB, missing: [err.variable] },
+        { status: 500 }
+      );
+    }
     console.error("Evening recap error:", err);
     return Response.json({ error: "Internal error" }, { status: 500 });
   }
