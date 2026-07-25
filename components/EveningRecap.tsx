@@ -1,6 +1,7 @@
 "use client";
 
 import { StockData } from "@/lib/mock-data";
+import { AnimatedNumber } from "@/components/AnimatedNumber";
 
 interface EveningRecapProps {
   summary: string;
@@ -9,7 +10,12 @@ interface EveningRecapProps {
   isYesterday?: boolean;
 }
 
-export function EveningRecap({ summary, frStocks, usStocks, isYesterday }: EveningRecapProps) {
+export function EveningRecap({
+  summary,
+  frStocks,
+  usStocks,
+  isYesterday,
+}: EveningRecapProps) {
   const allStocks = [...frStocks, ...usStocks];
   const top3 = [...allStocks].sort((a, b) => b.change - a.change).slice(0, 3);
   const bot3 = [...allStocks].sort((a, b) => a.change - b.change).slice(0, 3);
@@ -43,9 +49,12 @@ export function EveningRecap({ summary, frStocks, usStocks, isYesterday }: Eveni
                   <span className="font-bold text-[#f5f5f7] text-lg">{s.ticker}</span>
                   <span className="text-[#86868b] text-sm ml-2">{s.name}</span>
                 </div>
-                <span className="font-bold tabular-nums text-[#34c759]">
-                  +{s.change.toFixed(2)}%
-                </span>
+                <AnimatedNumber
+                  value={s.change}
+                  suffix="%"
+                  signed
+                  className="font-bold text-[#34c759]"
+                />
               </div>
             ))}
           </div>
@@ -62,9 +71,11 @@ export function EveningRecap({ summary, frStocks, usStocks, isYesterday }: Eveni
                   <span className="font-bold text-[#f5f5f7] text-lg">{s.ticker}</span>
                   <span className="text-[#86868b] text-sm ml-2">{s.name}</span>
                 </div>
-                <span className="font-bold tabular-nums text-[#ff3b30]">
-                  {s.change.toFixed(2)}%
-                </span>
+                <AnimatedNumber
+                  value={s.change}
+                  suffix="%"
+                  className="font-bold text-[#ff3b30]"
+                />
               </div>
             ))}
           </div>
