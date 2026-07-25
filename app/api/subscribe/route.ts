@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { sendConfirmationEmail } from "@/lib/email";
+import { generateUnsubscribeToken } from "@/lib/unsubscribe";
 
 export async function POST(request: Request) {
   try {
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
     }
 
     const subscriber = await prisma.subscriber.create({
-      data: { email },
+      data: { email, token: generateUnsubscribeToken() },
     });
 
     await sendConfirmationEmail(email, subscriber.token);

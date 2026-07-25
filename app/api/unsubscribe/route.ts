@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { isValidUnsubscribeToken } from "@/lib/unsubscribe";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -6,6 +7,14 @@ export async function GET(request: Request) {
 
   if (!token) {
     return new Response(unsubscribePage("Token manquant."), {
+      headers: { "Content-Type": "text/html" },
+      status: 400,
+    });
+  }
+
+  // Filtre de forme avant de toucher la base.
+  if (!isValidUnsubscribeToken(token)) {
+    return new Response(unsubscribePage("Lien invalide ou déjà utilisé."), {
       headers: { "Content-Type": "text/html" },
       status: 400,
     });

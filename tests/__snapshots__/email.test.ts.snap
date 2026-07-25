@@ -1,0 +1,80 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`template email — briefing matinal > correspond au snapshot 1`] = `
+"<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>StockRadar</title>
+</head>
+<body style="margin:0;padding:0;background:#000;font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;">
+<div style="display:none;max-height:0;overflow:hidden;">Briefing matinal — 25 juillet 2026 — 10 FR + 10 US à surveiller</div>
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#000;">
+  <tr><td align="center" style="padding:40px 16px;">
+    <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+      <tr><td style="padding-bottom:40px;">
+        <div style="font-size:28px;font-weight:700;letter-spacing:-1px;color:#f5f5f7;">StockRadar<span style="font-size:11px;font-weight:500;color:#86868b;letter-spacing:0;margin-left:8px;vertical-align:middle;border:1px solid #3a3a3e;border-radius:4px;padding:2px 6px;">Beta</span></div>
+      </td></tr>
+      <tr><td>
+        <h1 style="font-size:36px;font-weight:700;letter-spacing:-1.5px;color:#f5f5f7;margin:0 0 8px;">Briefing matinal</h1>
+        <p style="font-size:15px;color:#86868b;margin:0 0 40px;">25 juillet 2026</p>
+        <h2 style="font-size:20px;font-weight:600;letter-spacing:-0.5px;color:#f5f5f7;margin:0 0 20px;">Marché Français</h2>
+        <table width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td style="padding:14px 0;border-bottom:1px solid #2a2a2e;">
+        <div style="font-size:17px;font-weight:600;letter-spacing:-0.3px;color:#f5f5f7;">MC</div>
+        <div style="font-size:13px;color:#86868b;margin-top:2px;">LVMH Moët Hennessy</div>
+      </td>
+      <td style="padding:14px 0;border-bottom:1px solid #2a2a2e;text-align:right;font-variant-numeric:tabular-nums;">
+        <div style="font-size:17px;font-weight:600;color:#f5f5f7;">€687.40</div>
+        <div style="font-size:13px;font-weight:600;color:#34c759;margin-top:2px;">+2.34%</div>
+      </td>
+      <td style="padding:14px 16px;border-bottom:1px solid #2a2a2e;font-size:13px;color:#86868b;line-height:1.5;max-width:300px;">Résultats trimestriels au-dessus du consensus.</td>
+    </tr>
+  
+    <tr>
+      <td style="padding:14px 0;border-bottom:1px solid #2a2a2e;">
+        <div style="font-size:17px;font-weight:600;letter-spacing:-0.3px;color:#f5f5f7;">TTE</div>
+        <div style="font-size:13px;color:#86868b;margin-top:2px;">TotalEnergies</div>
+      </td>
+      <td style="padding:14px 0;border-bottom:1px solid #2a2a2e;text-align:right;font-variant-numeric:tabular-nums;">
+        <div style="font-size:17px;font-weight:600;color:#f5f5f7;">€58.12</div>
+        <div style="font-size:13px;font-weight:600;color:#ff3b30;margin-top:2px;">-1.07%</div>
+      </td>
+      <td style="padding:14px 16px;border-bottom:1px solid #2a2a2e;font-size:13px;color:#86868b;line-height:1.5;max-width:300px;">Recul du Brent sur fond de tensions OPEP+.</td>
+    </tr>
+  </table>
+        <h2 style="font-size:20px;font-weight:600;letter-spacing:-0.5px;color:#f5f5f7;margin:40px 0 20px;">Marché Américain</h2>
+        <table width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td style="padding:14px 0;border-bottom:1px solid #2a2a2e;">
+        <div style="font-size:17px;font-weight:600;letter-spacing:-0.3px;color:#f5f5f7;">AAPL</div>
+        <div style="font-size:13px;color:#86868b;margin-top:2px;">Apple Inc.</div>
+      </td>
+      <td style="padding:14px 0;border-bottom:1px solid #2a2a2e;text-align:right;font-variant-numeric:tabular-nums;">
+        <div style="font-size:17px;font-weight:600;color:#f5f5f7;">$268.01</div>
+        <div style="font-size:13px;font-weight:600;color:#34c759;margin-top:2px;">+0.82%</div>
+      </td>
+      <td style="padding:14px 16px;border-bottom:1px solid #2a2a2e;font-size:13px;color:#86868b;line-height:1.5;max-width:300px;">Anticipation du prochain cycle iPhone.</td>
+    </tr>
+  </table>
+      </td></tr>
+      <tr><td style="padding-top:40px;border-top:1px solid #2a2a2e;">
+        <p style="font-size:12px;color:#48484a;line-height:1.6;margin:0 0 16px;">
+          StockRadar n'est pas un prestataire de services d'investissement ni un conseiller en investissement au sens du Code monétaire et financier ; les informations diffusées sont purement informatives et ne constituent pas une recommandation d'investissement.
+        </p>
+        <p style="font-size:12px;color:#48484a;line-height:1.6;margin:0;">
+          <a href="https://stockradar.test/mentions-legales" style="color:#86868b;text-decoration:underline;">Mentions légales</a>
+          &nbsp;·&nbsp;
+          <a href="https://stockradar.test/confidentialite" style="color:#86868b;text-decoration:underline;">Confidentialité</a>
+          &nbsp;·&nbsp;
+          <a href="https://stockradar.test/api/unsubscribe?token=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" style="color:#86868b;text-decoration:underline;">Se désabonner</a>
+        </p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>"
+`;

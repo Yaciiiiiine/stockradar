@@ -1,5 +1,6 @@
 import { StockData } from "./mock-data";
 import { AMF_DISCLAIMER } from "./legal";
+import { buildUnsubscribeUrl } from "./unsubscribe";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 const FROM = "StockRadar <briefing@stockradar.fr>";
@@ -54,7 +55,7 @@ function baseTemplate(previewText: string, content: string, unsubToken: string):
           &nbsp;·&nbsp;
           <a href="${APP_URL}/confidentialite" style="color:#86868b;text-decoration:underline;">Confidentialité</a>
           &nbsp;·&nbsp;
-          <a href="${APP_URL}/api/unsubscribe?token=${unsubToken}" style="color:#86868b;text-decoration:underline;">Se désabonner</a>
+          <a href="${buildUnsubscribeUrl(unsubToken, APP_URL)}" style="color:#86868b;text-decoration:underline;">Se désabonner</a>
         </p>
       </td></tr>
     </table>
@@ -84,6 +85,30 @@ export async function sendConfirmationEmail(email: string, token: string) {
   });
 }
 
+/** Rend le HTML du briefing matinal. Extrait de l'envoi pour être testable. */
+export function renderMorningBrief(
+  date: string,
+  frStocks: StockData[],
+  usStocks: StockData[],
+  unsubToken: string
+): string {
+  const frRows = frStocks.map(stockRowHtml).join("");
+  const usRows = usStocks.map(stockRowHtml).join("");
+
+  return baseTemplate(
+    `Briefing matinal — ${date} — 10 FR + 10 US à surveiller`,
+    `<tr><td>
+        <h1 style="font-size:36px;font-weight:700;letter-spacing:-1.5px;color:#f5f5f7;margin:0 0 8px;">Briefing matinal</h1>
+        <p style="font-size:15px;color:#86868b;margin:0 0 40px;">${date}</p>
+        <h2 style="font-size:20px;font-weight:600;letter-spacing:-0.5px;color:#f5f5f7;margin:0 0 20px;">Marché Français</h2>
+        <table width="100%" cellpadding="0" cellspacing="0">${frRows}</table>
+        <h2 style="font-size:20px;font-weight:600;letter-spacing:-0.5px;color:#f5f5f7;margin:40px 0 20px;">Marché Américain</h2>
+        <table width="100%" cellpadding="0" cellspacing="0">${usRows}</table>
+      </td></tr>`,
+    unsubToken
+  );
+}
+
 export async function sendMorningBrief(
   emails: string[],
   tokens: Map<string, string>,
@@ -94,22 +119,12 @@ export async function sendMorningBrief(
   const resend = getResend();
   if (!resend) return;
 
-  const frRows = frStocks.map(stockRowHtml).join("");
-  const usRows = usStocks.map(stockRowHtml).join("");
-
   for (const email of emails) {
-    const token = tokens.get(email) ?? "";
-    const html = baseTemplate(
-      `Briefing matinal — ${date} — 10 FR + 10 US à surveiller`,
-      `<tr><td>
-        <h1 style="font-size:36px;font-weight:700;letter-spacing:-1.5px;color:#f5f5f7;margin:0 0 8px;">Briefing matinal</h1>
-        <p style="font-size:15px;color:#86868b;margin:0 0 40px;">${date}</p>
-        <h2 style="font-size:20px;font-weight:600;letter-spacing:-0.5px;color:#f5f5f7;margin:0 0 20px;">Marché Français</h2>
-        <table width="100%" cellpadding="0" cellspacing="0">${frRows}</table>
-        <h2 style="font-size:20px;font-weight:600;letter-spacing:-0.5px;color:#f5f5f7;margin:40px 0 20px;">Marché Américain</h2>
-        <table width="100%" cellpadding="0" cellspacing="0">${usRows}</table>
-      </td></tr>`,
-      token
+    const html = renderMorningBrief(
+      date,
+      frStocks,
+      usStocks,
+      tokens.get(email) ?? ""
     );
     await resend.emails.send({
       from: FROM,
@@ -118,6 +133,34 @@ export async function sendMorningBrief(
       html,
     });
   }
+}
+
+/** Rend le HTML du compte-rendu du soir. Extrait de l'envoi pour être testable. */
+export function renderEveningRecap(
+  date: string,
+  frStocks: StockData[],
+  usStocks: StockData[],
+  summary: string,
+  unsubToken: string
+): string {
+  const frRows = frStocks.map(stockRowHtml).join("");
+  const usRows = usStocks.map(stockRowHtml).join("");
+
+  return baseTemplate(
+    `Compte-rendu du soir — ${date}`,
+      `<tr><td>
+        <h1 style="font-size:36px;font-weight:700;letter-spacing:-1.5px;color:#f5f5f7;margin:0 0 8px;">Compte-rendu du soir</h1>
+        <p style="font-size:15px;color:#86868b;margin:0 0 32px;">${date}</p>
+        <div style="background:#1c1c1e;border-radius:16px;padding:24px;margin-bottom:40px;">
+          <p style="font-size:15px;color:#86868b;line-height:1.7;margin:0;">${summary}</p>
+        </div>
+        <h2 style="font-size:20px;font-weight:600;letter-spacing:-0.5px;color:#f5f5f7;margin:0 0 20px;">Performance — Marché Français</h2>
+        <table width="100%" cellpadding="0" cellspacing="0">${frRows}</table>
+        <h2 style="font-size:20px;font-weight:600;letter-spacing:-0.5px;color:#f5f5f7;margin:40px 0 20px;">Performance — Marché Américain</h2>
+        <table width="100%" cellpadding="0" cellspacing="0">${usRows}</table>
+      </td></tr>`,
+    unsubToken
+  );
 }
 
 export async function sendEveningRecap(
@@ -131,25 +174,13 @@ export async function sendEveningRecap(
   const resend = getResend();
   if (!resend) return;
 
-  const frRows = frStocks.map(stockRowHtml).join("");
-  const usRows = usStocks.map(stockRowHtml).join("");
-
   for (const email of emails) {
-    const token = tokens.get(email) ?? "";
-    const html = baseTemplate(
-      `Compte-rendu du soir — ${date}`,
-      `<tr><td>
-        <h1 style="font-size:36px;font-weight:700;letter-spacing:-1.5px;color:#f5f5f7;margin:0 0 8px;">Compte-rendu du soir</h1>
-        <p style="font-size:15px;color:#86868b;margin:0 0 32px;">${date}</p>
-        <div style="background:#1c1c1e;border-radius:16px;padding:24px;margin-bottom:40px;">
-          <p style="font-size:15px;color:#86868b;line-height:1.7;margin:0;">${summary}</p>
-        </div>
-        <h2 style="font-size:20px;font-weight:600;letter-spacing:-0.5px;color:#f5f5f7;margin:0 0 20px;">Performance — Marché Français</h2>
-        <table width="100%" cellpadding="0" cellspacing="0">${frRows}</table>
-        <h2 style="font-size:20px;font-weight:600;letter-spacing:-0.5px;color:#f5f5f7;margin:40px 0 20px;">Performance — Marché Américain</h2>
-        <table width="100%" cellpadding="0" cellspacing="0">${usRows}</table>
-      </td></tr>`,
-      token
+    const html = renderEveningRecap(
+      date,
+      frStocks,
+      usStocks,
+      summary,
+      tokens.get(email) ?? ""
     );
     await resend.emails.send({
       from: FROM,
