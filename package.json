@@ -10,6 +10,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "audit:project": "node scripts/audit-project.mjs",
+    "stats": "node scripts/stats.mjs",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write ."
@@ -49,6 +50,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv-cli": "^11.0.0",
+    "jiti": "^2.7.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.10"
