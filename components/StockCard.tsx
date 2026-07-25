@@ -2,6 +2,7 @@
 
 import { StockData } from "@/lib/mock-data";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
+import { Sparkline } from "@/components/Sparkline";
 
 interface StockCardProps {
   stock: StockData;
@@ -48,6 +49,14 @@ export function StockCard({ stock, index }: StockCardProps) {
             <AnimatedNumber value={stock.change} suffix="%" signed />
           </div>
         </div>
+      </div>
+
+      <div className="mt-4 -mx-1">
+        <Sparkline
+          values={stock.sparkline}
+          change={stock.change}
+          ticker={stock.ticker}
+        />
       </div>
 
       <p className="mt-4 text-sm text-[#86868b] leading-relaxed line-clamp-3">
