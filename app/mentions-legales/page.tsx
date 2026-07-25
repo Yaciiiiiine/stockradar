@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  LegalLayout,
-  LegalSection,
-  LegalField,
-} from "@/components/LegalLayout";
+import { LegalLayout, LegalSection, LegalField } from "@/components/LegalLayout";
 import { LEGAL, HOST, AMF_DISCLAIMER } from "@/lib/legal";
 
 export const metadata: Metadata = {
   title: "Mentions légales — StockRadar",
-  description:
-    "Éditeur, hébergeur et conditions d'utilisation du site StockRadar.",
+  description: "Éditeur, hébergeur et conditions d'utilisation du site StockRadar.",
   robots: { index: true, follow: true },
 };
 
@@ -37,8 +32,8 @@ export default function MentionsLegalesPage() {
 
       <LegalSection title="Hébergeur">
         <p>
-          Le site est hébergé par <strong className="text-[#f5f5f7]">{HOST.name}</strong>,{" "}
-          {HOST.address}.
+          Le site est hébergé par{" "}
+          <strong className="text-[#f5f5f7]">{HOST.name}</strong>, {HOST.address}.
         </p>
         <p>
           Site web :{" "}
@@ -55,16 +50,16 @@ export default function MentionsLegalesPage() {
 
       <LegalSection title="Nature du service">
         <p>
-          StockRadar publie chaque jour ouvré une sélection d&apos;actions
-          françaises et américaines accompagnée d&apos;éléments de contexte, ainsi
-          qu&apos;un compte-rendu de séance. Le service est gratuit et diffusé
-          sur le site et, sur inscription, par courrier électronique.
+          StockRadar publie chaque jour ouvré une sélection d&apos;actions françaises et
+          américaines accompagnée d&apos;éléments de contexte, ainsi qu&apos;un
+          compte-rendu de séance. Le service est gratuit et diffusé sur le site et, sur
+          inscription, par courrier électronique.
         </p>
         <p>
-          Les cours et données de marché proviennent de fournisseurs tiers
-          (Finnhub, Yahoo Finance). Ils sont fournis à titre indicatif, peuvent
-          être différés, incomplets ou erronés, et ne sauraient engager la
-          responsabilité de l&apos;éditeur.
+          Les cours et données de marché proviennent de fournisseurs tiers (Finnhub,
+          Yahoo Finance). Ils sont fournis à titre indicatif, peuvent être différés,
+          incomplets ou erronés, et ne sauraient engager la responsabilité de
+          l&apos;éditeur.
         </p>
       </LegalSection>
 
@@ -73,27 +68,27 @@ export default function MentionsLegalesPage() {
           <p className="text-[#f5f5f7]">{AMF_DISCLAIMER}</p>
         </div>
         <p>
-          L&apos;éditeur n&apos;est ni agréé ni enregistré auprès de
-          l&apos;Autorité des marchés financiers (AMF) ou de l&apos;Autorité de
-          contrôle prudentiel et de résolution (ACPR). Aucun contenu publié ne
-          constitue une sollicitation, une offre, un conseil personnalisé ni une
-          incitation à acheter ou vendre un instrument financier.
+          L&apos;éditeur n&apos;est ni agréé ni enregistré auprès de l&apos;Autorité des
+          marchés financiers (AMF) ou de l&apos;Autorité de contrôle prudentiel et de
+          résolution (ACPR). Aucun contenu publié ne constitue une sollicitation, une
+          offre, un conseil personnalisé ni une incitation à acheter ou vendre un
+          instrument financier.
         </p>
         <p>
-          Investir en bourse comporte un risque de perte en capital. Les
-          performances passées ne préjugent pas des performances futures. Toute
-          décision d&apos;investissement relève de la seule responsabilité du
-          lecteur, qui est invité à consulter un professionnel agréé.
+          Investir en bourse comporte un risque de perte en capital. Les performances
+          passées ne préjugent pas des performances futures. Toute décision
+          d&apos;investissement relève de la seule responsabilité du lecteur, qui est
+          invité à consulter un professionnel agréé.
         </p>
       </LegalSection>
 
       <LegalSection title="Propriété intellectuelle">
         <p>
-          Les textes, la charte graphique et le code source du site sont la
-          propriété de l&apos;éditeur, à l&apos;exception des données de marché
-          et des marques citées, qui restent la propriété de leurs titulaires
-          respectifs. Toute reproduction intégrale ou substantielle sans
-          autorisation préalable est interdite.
+          Les textes, la charte graphique et le code source du site sont la propriété de
+          l&apos;éditeur, à l&apos;exception des données de marché et des marques
+          citées, qui restent la propriété de leurs titulaires respectifs. Toute
+          reproduction intégrale ou substantielle sans autorisation préalable est
+          interdite.
         </p>
       </LegalSection>
 

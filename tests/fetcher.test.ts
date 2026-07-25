@@ -89,9 +89,7 @@ describe("fetchAllStocks — fallback mock", () => {
     expect(runLog.tickers.find((t) => t.symbol === "AAPL")!.final_source).toBe(
       "finnhub"
     );
-    expect(runLog.tickers.find((t) => t.symbol === "MC.PA")!.final_source).toBe(
-      "mock"
-    );
+    expect(runLog.tickers.find((t) => t.symbol === "MC.PA")!.final_source).toBe("mock");
   });
 });
 

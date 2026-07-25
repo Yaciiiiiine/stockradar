@@ -31,9 +31,7 @@ export function LegalLayout({
           {title}
         </h1>
         <p className="text-lg text-[#86868b] mt-4 leading-relaxed">{intro}</p>
-        <p className="text-xs text-[#48484a] mt-6">
-          Dernière mise à jour : {updated}
-        </p>
+        <p className="text-xs text-[#48484a] mt-6">Dernière mise à jour : {updated}</p>
 
         <div className="mt-16 space-y-14">{children}</div>
       </div>
@@ -63,13 +61,7 @@ export function LegalSection({
 }
 
 /** Rend une valeur légale, ou un marqueur visible si elle n'est pas remplie. */
-export function LegalField({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | null;
-}) {
+export function LegalField({ label, value }: { label: string; value: string | null }) {
   return (
     <div className="flex flex-col sm:flex-row sm:gap-4 py-2.5 border-b border-[#1c1c1e] last:border-0">
       <dt className="text-[#48484a] text-sm sm:w-56 shrink-0">{label}</dt>

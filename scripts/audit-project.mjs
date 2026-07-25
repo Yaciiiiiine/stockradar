@@ -13,9 +13,13 @@
  */
 
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
-import { join, resolve, relative } from "node:path";
+import { join, resolve } from "node:path";
 
-const ROOT = resolve(process.argv.find((a) => !a.startsWith("-") && a !== process.argv[0] && a !== process.argv[1]) ?? process.cwd());
+const ROOT = resolve(
+  process.argv.find(
+    (a) => !a.startsWith("-") && a !== process.argv[0] && a !== process.argv[1]
+  ) ?? process.cwd()
+);
 const STRICT = process.argv.includes("--strict");
 const THRESHOLD = 80;
 
@@ -206,9 +210,7 @@ const checks = [
         has("app/opengraph-image.tsx") && /metadataBase/.test(read("app/layout.tsx"));
       return {
         ok,
-        detail: has("app/opengraph-image.tsx")
-          ? "image présente"
-          : "image absente",
+        detail: has("app/opengraph-image.tsx") ? "image présente" : "image absente",
       };
     },
   },
@@ -241,7 +243,8 @@ const checks = [
       if (!inEmail) missing.push("emails");
       return {
         ok: missing.length === 0,
-        detail: missing.length === 0 ? "site + emails" : `manque : ${missing.join(", ")}`,
+        detail:
+          missing.length === 0 ? "site + emails" : `manque : ${missing.join(", ")}`,
       };
     },
   },
@@ -325,7 +328,9 @@ if (legalSrc) {
     console.log(
       `\n${C.yellow}À compléter par l'éditeur${C.reset} ${C.gray}(non compté dans le score)${C.reset}`
     );
-    console.log(`  ${C.yellow}⚠${C.reset}  ${pending.length} champs légaux vides : ${pending.join(", ")}`);
+    console.log(
+      `  ${C.yellow}⚠${C.reset}  ${pending.length} champs légaux vides : ${pending.join(", ")}`
+    );
   }
 }
 
@@ -334,12 +339,16 @@ if (legalSrc) {
 const score = Math.round((earned / total) * 100);
 const color = score >= 90 ? C.green : score >= 70 ? C.yellow : C.red;
 
-console.log(`\n${C.bold}Score${C.reset}  ${color}${C.bold}${score}/100${C.reset} ${C.gray}(${earned}/${total} points)${C.reset}`);
+console.log(
+  `\n${C.bold}Score${C.reset}  ${color}${C.bold}${score}/100${C.reset} ${C.gray}(${earned}/${total} points)${C.reset}`
+);
 
 if (failures.length > 0) {
   console.log(`\n${C.bold}Restant${C.reset}`);
   for (const f of failures) {
-    console.log(`  ${C.red}·${C.reset} [${f.cat}] ${f.label} ${C.gray}(${f.weight} pts)${C.reset}`);
+    console.log(
+      `  ${C.red}·${C.reset} [${f.cat}] ${f.label} ${C.gray}(${f.weight} pts)${C.reset}`
+    );
   }
 }
 console.log("");

@@ -15,8 +15,8 @@ export default function NotFound() {
         </h1>
 
         <p className="text-lg md:text-xl text-[#86868b] font-light tracking-tight leading-relaxed mb-10">
-          Cette page n&apos;existe pas ou n&apos;existe plus. Le briefing que
-          vous cherchez est peut-être dans les archives.
+          Cette page n&apos;existe pas ou n&apos;existe plus. Le briefing que vous
+          cherchez est peut-être dans les archives.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">

@@ -9,7 +9,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "audit:project": "node scripts/audit-project.mjs"
+    "audit:project": "node scripts/audit-project.mjs",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write ."
   },
   "dependencies": {
     "@libsql/client": "^0.17.2",
@@ -39,6 +42,7 @@
     "yahoo-finance2": "^3.14.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.5",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/pg": "^8.20.0",

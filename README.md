@@ -102,6 +102,31 @@ le schedule UTC ne tombe plus sur l'heure visée :
 > heure sur l'heure d'exécution réelle. Le log ci-dessus reflète l'heure de
 > déclenchement effective, pas l'heure théorique.
 
+## Qualité
+
+```bash
+npm test              # Vitest
+npm run typecheck     # tsc --noEmit
+npm run lint          # Biome (lint + format, lecture seule)
+npm run lint:fix      # Biome, applique les corrections
+npm run audit:project # audit structurel, score /100
+```
+
+⚠️ **`npm run lint` échoue aujourd'hui, et c'est attendu.** Biome a été ajouté
+avec sa config et ses scripts sans reformater le code existant. Il reste une
+vingtaine de signalements, tous antérieurs à son introduction : mise en forme,
+`import type` manquants, deux SVG sans `<title>`. Les fichiers ajoutés depuis
+sont propres.
+
+Pour solder la dette d'un coup — dans un commit dédié, sans autre changement,
+pour que le diff reste relisible :
+
+```bash
+npm run lint:fix
+```
+
+Tant que ce n'est pas fait, `lint` n'est volontairement pas branché sur la CI.
+
 ## Disclaimer
 
 > StockRadar est un outil d'information. Ceci n'est pas un conseil en investissement. Faites vos propres recherches.

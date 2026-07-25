@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect } from "react";
 
-export default function Error({
+export default function ErrorBoundary({
   error,
   unstable_retry,
 }: {
@@ -28,8 +28,8 @@ export default function Error({
         </h1>
 
         <p className="text-lg md:text-xl text-[#86868b] font-light tracking-tight leading-relaxed mb-10">
-          Le briefing n&apos;a pas pu être chargé. C&apos;est probablement
-          temporaire — réessayez dans un instant.
+          Le briefing n&apos;a pas pu être chargé. C&apos;est probablement temporaire —
+          réessayez dans un instant.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">

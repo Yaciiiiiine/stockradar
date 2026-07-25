@@ -63,9 +63,7 @@ describe("jeton de désinscription — lien", () => {
   it("construit un lien absolu contenant le jeton", () => {
     const token = generateUnsubscribeToken();
     const url = buildUnsubscribeUrl(token, "https://stockradar.test");
-    expect(url).toBe(
-      `https://stockradar.test/api/unsubscribe?token=${token}`
-    );
+    expect(url).toBe(`https://stockradar.test/api/unsubscribe?token=${token}`);
   });
 
   it("ne double pas le slash quand l'URL de base en a un", () => {

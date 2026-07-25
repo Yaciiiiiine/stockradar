@@ -44,9 +44,7 @@ describe("template email — briefing matinal", () => {
 
   it("porte le lien de désinscription du destinataire", () => {
     const html = renderMorningBrief(DATE, FR, US, TOKEN);
-    expect(html).toContain(
-      `https://stockradar.test/api/unsubscribe?token=${TOKEN}`
-    );
+    expect(html).toContain(`https://stockradar.test/api/unsubscribe?token=${TOKEN}`);
   });
 
   it("porte les liens légaux et l'avertissement AMF", () => {

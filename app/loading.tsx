@@ -21,8 +21,8 @@ export default function Loading() {
           <div className="h-5 w-96 max-w-full rounded-full bg-[#1c1c1e] mb-12" />
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }, (_, i) => (
-              <div key={i} className="bg-[#1c1c1e] rounded-2xl p-6">
+            {["a", "b", "c", "d", "e", "f"].map((slot) => (
+              <div key={slot} className="bg-[#1c1c1e] rounded-2xl p-6">
                 <div className="flex items-start justify-between mb-6">
                   <div className="flex-1">
                     <div className="h-5 w-20 rounded bg-[#2c2c2e] mb-2" />

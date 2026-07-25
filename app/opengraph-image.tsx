@@ -24,100 +24,96 @@ export default async function OpengraphImage() {
   const usCount = ALL_TICKERS.filter((t) => t.market === "US").length;
 
   return new ImageResponse(
-    (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          background: "#000000",
-          padding: "72px 80px",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <div
-            style={{
-              fontSize: 34,
-              fontWeight: 700,
-              color: "#f5f5f7",
-              letterSpacing: -1,
-            }}
-          >
-            StockRadar
-          </div>
-          <div
-            style={{
-              fontSize: 18,
-              color: "#86868b",
-              border: "1px solid #3a3a3e",
-              borderRadius: 8,
-              padding: "4px 12px",
-            }}
-          >
-            Beta
-          </div>
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <div
-            style={{
-              fontSize: 76,
-              fontWeight: 700,
-              color: "#f5f5f7",
-              letterSpacing: -3,
-              lineHeight: 1.05,
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <span>{`Les ${ALL_TICKERS.length} actions FR et US`}</span>
-            <span>{"à surveiller. Chaque jour."}</span>
-          </div>
-          <div style={{ fontSize: 30, color: "#86868b", marginTop: 28 }}>
-            {date}
-          </div>
-        </div>
-
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        background: "#000000",
+        padding: "72px 80px",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 40,
-            borderTop: "1px solid #2a2a2e",
-            paddingTop: 32,
+            fontSize: 34,
+            fontWeight: 700,
+            color: "#f5f5f7",
+            letterSpacing: -1,
           }}
         >
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: 44, fontWeight: 700, color: "#f5f5f7" }}>
-              {frCount}
-            </span>
-            <span style={{ fontSize: 22, color: "#86868b", marginTop: 4 }}>
-              actions françaises
-            </span>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: 44, fontWeight: 700, color: "#f5f5f7" }}>
-              {usCount}
-            </span>
-            <span style={{ fontSize: 22, color: "#86868b", marginTop: 4 }}>
-              actions américaines
-            </span>
-          </div>
-          <div
-            style={{
-              marginLeft: "auto",
-              fontSize: 20,
-              color: "#48484a",
-              display: "flex",
-            }}
-          >
-            Briefing matin et soir
-          </div>
+          StockRadar
+        </div>
+        <div
+          style={{
+            fontSize: 18,
+            color: "#86868b",
+            border: "1px solid #3a3a3e",
+            borderRadius: 8,
+            padding: "4px 12px",
+          }}
+        >
+          Beta
         </div>
       </div>
-    ),
+
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <div
+          style={{
+            fontSize: 76,
+            fontWeight: 700,
+            color: "#f5f5f7",
+            letterSpacing: -3,
+            lineHeight: 1.05,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <span>{`Les ${ALL_TICKERS.length} actions FR et US`}</span>
+          <span>{"à surveiller. Chaque jour."}</span>
+        </div>
+        <div style={{ fontSize: 30, color: "#86868b", marginTop: 28 }}>{date}</div>
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 40,
+          borderTop: "1px solid #2a2a2e",
+          paddingTop: 32,
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <span style={{ fontSize: 44, fontWeight: 700, color: "#f5f5f7" }}>
+            {frCount}
+          </span>
+          <span style={{ fontSize: 22, color: "#86868b", marginTop: 4 }}>
+            actions françaises
+          </span>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <span style={{ fontSize: 44, fontWeight: 700, color: "#f5f5f7" }}>
+            {usCount}
+          </span>
+          <span style={{ fontSize: 22, color: "#86868b", marginTop: 4 }}>
+            actions américaines
+          </span>
+        </div>
+        <div
+          style={{
+            marginLeft: "auto",
+            fontSize: 20,
+            color: "#48484a",
+            display: "flex",
+          }}
+        >
+          Briefing matin et soir
+        </div>
+      </div>
+    </div>,
     size
   );
 }
