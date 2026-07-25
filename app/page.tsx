@@ -2,10 +2,10 @@ import { Hero } from "@/components/Hero";
 import { MarketSection } from "@/components/MarketSection";
 import { EveningRecap } from "@/components/EveningRecap";
 import { NewsletterForm } from "@/components/NewsletterForm";
+import { SiteFooter } from "@/components/SiteFooter";
 import { MOCK_FR_STOCKS, MOCK_US_STOCKS, MOCK_EVENING_SUMMARY, type StockData } from "@/lib/mock-data";
 import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
-import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -131,34 +131,7 @@ export default async function HomePage() {
         <NewsletterForm />
       </div>
 
-      <footer className="border-t border-[#1c1c1e] px-6 py-12">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <div className="font-bold text-[#f5f5f7] text-lg tracking-tight">
-              StockRadar{" "}
-              <span className="text-xs font-normal text-[#86868b] border border-[#3a3a3e] rounded-full px-2 py-0.5 ml-1">
-                Beta
-              </span>
-            </div>
-            <p className="text-xs text-[#48484a] mt-1">
-              &copy; {new Date().getFullYear()} StockRadar
-            </p>
-          </div>
-
-          <div className="flex flex-col items-center md:items-end gap-2">
-            <Link
-              href="/archive"
-              className="text-sm text-[#86868b] hover:text-[#f5f5f7] transition-colors"
-            >
-              Archives
-            </Link>
-            <p className="text-xs text-[#48484a] max-w-sm text-center md:text-right leading-relaxed">
-              StockRadar est un outil d&apos;information. Ceci n&apos;est pas un
-              conseil en investissement. Faites vos propres recherches.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

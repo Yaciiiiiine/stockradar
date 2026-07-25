@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 import { SITE_URL } from "@/lib/site";
+import { LEGAL_LAST_UPDATED } from "@/lib/legal";
 
 // Le sitemap dépend du contenu de la base : il ne doit pas être figé au build.
 export const dynamic = "force-dynamic";
@@ -36,6 +37,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: "daily",
       priority: 0.8,
+    },
+    {
+      url: `${SITE_URL}/mentions-legales`,
+      lastModified: new Date(LEGAL_LAST_UPDATED),
+      changeFrequency: "yearly",
+      priority: 0.2,
+    },
+    {
+      url: `${SITE_URL}/confidentialite`,
+      lastModified: new Date(LEGAL_LAST_UPDATED),
+      changeFrequency: "yearly",
+      priority: 0.2,
     },
     ...dates.map((date) => ({
       url: `${SITE_URL}/archive/${date}`,

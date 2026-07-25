@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import Link from "next/link";
+import { SiteFooter } from "@/components/SiteFooter";
 
 export const dynamic = "force-dynamic";
 
@@ -31,8 +32,8 @@ export default async function ArchivePage() {
   const dates = await getArchiveDates();
 
   return (
-    <div className="bg-black min-h-screen">
-      <div className="max-w-4xl mx-auto px-6 py-24">
+    <div className="bg-black min-h-screen flex flex-col">
+      <div className="flex-1 max-w-4xl w-full mx-auto px-6 py-24">
         <div className="mb-16">
           <Link
             href="/"
@@ -106,6 +107,8 @@ export default async function ArchivePage() {
           </div>
         )}
       </div>
+
+      <SiteFooter />
     </div>
   );
 }

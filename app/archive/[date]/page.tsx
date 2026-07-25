@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { MarketSection } from "@/components/MarketSection";
 import { EveningRecap } from "@/components/EveningRecap";
+import { SiteFooter } from "@/components/SiteFooter";
 import { type StockData } from "@/lib/mock-data";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -111,13 +112,9 @@ export default async function ArchiveDatePage({
         </div>
       )}
 
-      <footer className="border-t border-[#1c1c1e] px-6 py-12 mt-12">
-        <div className="max-w-7xl mx-auto">
-          <p className="text-xs text-[#48484a]">
-            StockRadar est un outil d&apos;information. Ceci n&apos;est pas un conseil en investissement.
-          </p>
-        </div>
-      </footer>
+      <div className="mt-12">
+        <SiteFooter />
+      </div>
     </div>
   );
 }

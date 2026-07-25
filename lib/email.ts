@@ -1,4 +1,5 @@
 import { StockData } from "./mock-data";
+import { AMF_DISCLAIMER } from "./legal";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 const FROM = "StockRadar <briefing@stockradar.fr>";
@@ -45,8 +46,14 @@ function baseTemplate(previewText: string, content: string, unsubToken: string):
       </td></tr>
       ${content}
       <tr><td style="padding-top:40px;border-top:1px solid #2a2a2e;">
+        <p style="font-size:12px;color:#48484a;line-height:1.6;margin:0 0 16px;">
+          ${AMF_DISCLAIMER}
+        </p>
         <p style="font-size:12px;color:#48484a;line-height:1.6;margin:0;">
-          StockRadar est un outil d'information. Ceci n'est pas un conseil en investissement. Faites vos propres recherches.<br><br>
+          <a href="${APP_URL}/mentions-legales" style="color:#86868b;text-decoration:underline;">Mentions légales</a>
+          &nbsp;·&nbsp;
+          <a href="${APP_URL}/confidentialite" style="color:#86868b;text-decoration:underline;">Confidentialité</a>
+          &nbsp;·&nbsp;
           <a href="${APP_URL}/api/unsubscribe?token=${unsubToken}" style="color:#86868b;text-decoration:underline;">Se désabonner</a>
         </p>
       </td></tr>
