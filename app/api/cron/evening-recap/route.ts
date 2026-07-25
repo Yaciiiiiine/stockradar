@@ -2,12 +2,10 @@ import { prisma } from "@/lib/prisma";
 import { getEveningStocks } from "@/lib/stocks";
 import { sendEveningRecap } from "@/lib/email";
 import { format } from "date-fns";
+import { isAuthorized, unauthorized } from "@/lib/auth";
 
 export async function GET(request: Request) {
-  const auth = request.headers.get("authorization");
-  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!isAuthorized(request)) return unauthorized();
 
   const today = format(new Date(), "yyyy-MM-dd");
 
