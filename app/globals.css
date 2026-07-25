@@ -19,6 +19,29 @@ html {
 }
 
 /*
+ * Styles requis par Lenis (components/SmoothScroll.tsx), recopiés depuis
+ * lenis/dist/lenis.css plutôt qu'importés : quelques règles ne justifient pas
+ * une feuille de plus, et Tailwind v4 n'avale pas un @import de node_modules
+ * après sa propre directive.
+ */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/*
  * Contrepartie CSS de lib/motion.ts.
  *
  * Neutralise tout ce que le JS ne contrôle pas : transitions Tailwind,
