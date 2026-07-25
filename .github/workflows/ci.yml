@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      # Aucune étape ne se connecte à la base : le build ne rend que des pages
+      # force-dynamic et prisma generate ne lit que le schéma. Ces valeurs
+      # satisfont les lectures de process.env sans exposer de secret.
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      CRON_SECRET: ci-placeholder
+      NEXT_PUBLIC_APP_URL: https://stockradar-five.vercel.app
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Prisma generate
+        run: npx prisma generate
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+      # Informatif : l'audit rapporte l'état structurel du dépôt sans
+      # faire échouer le job. Passer --strict pour en faire une porte.
+      - name: Audit (informatif)
+        run: node scripts/audit-project.mjs
+        continue-on-error: true
