@@ -3,6 +3,7 @@ import { MarketSection } from "@/components/MarketSection";
 import { EveningRecap } from "@/components/EveningRecap";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { SiteFooter } from "@/components/SiteFooter";
+import { PageTransition } from "@/components/PageTransition";
 import {
   MOCK_FR_STOCKS,
   MOCK_US_STOCKS,
@@ -134,41 +135,43 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="bg-black">
-      <Hero date={new Date()} />
+    <PageTransition>
+      <div className="bg-black">
+        <Hero date={new Date()} />
 
-      <div className="border-t border-[#1c1c1e]">
-        <MarketSection
-          title="Marché Américain"
-          subtitle="10 actions US à surveiller aujourd'hui"
-          stocks={usStocks}
-        />
-      </div>
-
-      <div className="border-t border-[#1c1c1e]">
-        <MarketSection
-          title="Marché Français"
-          subtitle="10 actions FR à surveiller aujourd'hui"
-          stocks={frStocks}
-        />
-      </div>
-
-      {eveningData && (
         <div className="border-t border-[#1c1c1e]">
-          <EveningRecap
-            summary={eveningData.summary}
-            frStocks={eveningData.frStocks}
-            usStocks={eveningData.usStocks}
-            isYesterday={eveningData.isYesterday}
+          <MarketSection
+            title="Marché Américain"
+            subtitle="10 actions US à surveiller aujourd'hui"
+            stocks={usStocks}
           />
         </div>
-      )}
 
-      <div className="border-t border-[#1c1c1e]">
-        <NewsletterForm />
+        <div className="border-t border-[#1c1c1e]">
+          <MarketSection
+            title="Marché Français"
+            subtitle="10 actions FR à surveiller aujourd'hui"
+            stocks={frStocks}
+          />
+        </div>
+
+        {eveningData && (
+          <div className="border-t border-[#1c1c1e]">
+            <EveningRecap
+              summary={eveningData.summary}
+              frStocks={eveningData.frStocks}
+              usStocks={eveningData.usStocks}
+              isYesterday={eveningData.isYesterday}
+            />
+          </div>
+        )}
+
+        <div className="border-t border-[#1c1c1e]">
+          <NewsletterForm />
+        </div>
+
+        <SiteFooter />
       </div>
-
-      <SiteFooter />
-    </div>
+    </PageTransition>
   );
 }

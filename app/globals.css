@@ -19,6 +19,46 @@ html {
 }
 
 /*
+ * Transitions de page (components/PageTransition.tsx).
+ *
+ * Fondu plus léger décalage vertical. Timing asymétrique : la page quittée
+ * part vite pour ne pas disputer l'attention, la nouvelle arrive plus
+ * doucement et attend que la sortie soit finie.
+ */
+:root {
+  --page-exit: 140ms;
+  --page-enter: 260ms;
+}
+
+::view-transition-old(.page-exit) {
+  animation: var(--page-exit) ease-in both page-fade reverse;
+}
+
+::view-transition-new(.page-enter) {
+  animation:
+    var(--page-enter) ease-out var(--page-exit) both page-fade,
+    var(--page-enter) ease-out var(--page-exit) both page-rise;
+}
+
+@keyframes page-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes page-rise {
+  from {
+    transform: translateY(8px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/*
  * Styles requis par Lenis (components/SmoothScroll.tsx), recopiés depuis
  * lenis/dist/lenis.css plutôt qu'importés : quelques règles ne justifient pas
  * une feuille de plus, et Tailwind v4 n'avale pas un @import de node_modules
