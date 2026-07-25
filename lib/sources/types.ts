@@ -18,6 +18,13 @@ export interface StockSource {
   canFetch(symbol: string): boolean;
 
   /**
+   * Série intraday optionnelle pour la sparkline. Une source qui ne sait pas
+   * la fournir omet simplement la méthode — le fetcher génère alors une série
+   * cohérente avec la variation du jour.
+   */
+  fetchSparkline?(symbol: string): Promise<number[]>;
+
+  /**
    * Récupère une quote. Throw en cas d'échec — le fetcher gère le fallback.
    */
   fetchQuote(symbol: string): Promise<StockQuote>;

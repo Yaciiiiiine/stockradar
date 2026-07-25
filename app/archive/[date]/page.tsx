@@ -3,6 +3,7 @@ import { MarketSection } from "@/components/MarketSection";
 import { EveningRecap } from "@/components/EveningRecap";
 import { SiteFooter } from "@/components/SiteFooter";
 import { type StockData } from "@/lib/mock-data";
+import { generateSparkline } from "@/lib/sparkline";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import Link from "next/link";
@@ -11,9 +12,17 @@ import { notFound } from "next/navigation";
 export const dynamic = "force-dynamic";
 
 function toStockData(s: {
-  ticker: string; name: string; market: string; price: number;
-  change: number; reason: string; preMarket?: number | null; volume?: number | null;
+  ticker: string;
+  name: string;
+  market: string;
+  price: number;
+  change: number;
+  reason: string;
+  preMarket?: number | null;
+  volume?: number | null;
+  sparkline?: number[] | null;
 }): StockData {
+  const stored = s.sparkline ?? [];
   return {
     ticker: s.ticker,
     name: s.name,
@@ -23,6 +32,9 @@ function toStockData(s: {
     reason: s.reason,
     preMarket: s.preMarket ?? undefined,
     volume: s.volume ?? undefined,
+    // Briefs antérieurs à la colonne sparkline : série reconstruite.
+    sparkline:
+      stored.length >= 2 ? stored : generateSparkline(s.ticker, s.price, s.change),
   };
 }
 

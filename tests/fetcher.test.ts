@@ -22,12 +22,15 @@ vi.mock("@/lib/sources/finnhub", () => ({
   }),
 }));
 
+const yahooFetchSparkline = vi.fn<(symbol: string) => Promise<number[]>>();
+
 vi.mock("@/lib/sources/yahoo", () => ({
   yahooSource: {
     name: "yahoo",
     priority: 2,
     canFetch: () => true,
     fetchQuote: yahooFetchQuote,
+    fetchSparkline: yahooFetchSparkline,
   } satisfies StockSource,
 }));
 
@@ -50,6 +53,8 @@ const LVMH: TickerDef = { symbol: "MC.PA", name: "LVMH", market: "FR" };
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // Par défaut Yahoo ne fournit pas de série : le fetcher doit en générer une.
+  yahooFetchSparkline.mockResolvedValue([]);
 });
 
 describe("fetchAllStocks — fallback mock", () => {
@@ -90,6 +95,37 @@ describe("fetchAllStocks — fallback mock", () => {
       "finnhub"
     );
     expect(runLog.tickers.find((t) => t.symbol === "MC.PA")!.final_source).toBe("mock");
+  });
+});
+
+describe("fetchAllStocks — sparkline", () => {
+  it("préfère la série intraday réelle quand Yahoo la fournit", async () => {
+    finnhubFetchQuote.mockResolvedValue(quote("AAPL", 200, "finnhub"));
+    yahooFetchQuote.mockResolvedValue(quote("AAPL", 200, "yahoo"));
+    yahooFetchSparkline.mockResolvedValue([198, 199, 200]);
+
+    const { stocks } = await fetchAllStocks([AAPL]);
+    expect(stocks[0].sparkline).toEqual([198, 199, 200]);
+  });
+
+  it("génère une série quand Yahoo n'a rien à donner", async () => {
+    finnhubFetchQuote.mockResolvedValue(quote("AAPL", 200, "finnhub"));
+    yahooFetchQuote.mockRejectedValue(new Error("indisponible"));
+    yahooFetchSparkline.mockResolvedValue([]);
+
+    const { stocks } = await fetchAllStocks([AAPL]);
+    expect(stocks[0].sparkline!.length).toBeGreaterThan(2);
+    // Elle doit finir sur le prix retenu, pas sur une valeur arbitraire.
+    expect(stocks[0].sparkline!.at(-1)).toBeCloseTo(200, 6);
+  });
+
+  it("ne casse pas le ticker quand la série est trop courte pour être tracée", async () => {
+    finnhubFetchQuote.mockResolvedValue(quote("AAPL", 200, "finnhub"));
+    yahooFetchSparkline.mockResolvedValue([200]);
+
+    const { stocks } = await fetchAllStocks([AAPL]);
+    expect(stocks[0].price).toBe(200);
+    expect(stocks[0].sparkline!.length).toBeGreaterThan(2);
   });
 });
 

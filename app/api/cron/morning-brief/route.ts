@@ -53,6 +53,7 @@ export async function GET(request: Request) {
             reason: s.reason,
             preMarket: s.preMarket ?? null,
             volume: s.volume ?? null,
+            sparkline: s.sparkline ?? [],
           })),
         },
       },

@@ -38,5 +38,7 @@ model StockEntry {
   reason    String
   preMarket Float?
   volume    Float?
+  /// Série intraday pour la sparkline. Liste vide si la source n'a rien fourni.
+  sparkline Float[]
   createdAt DateTime   @default(now())
 }

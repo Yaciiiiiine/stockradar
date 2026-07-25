@@ -1,16 +1,23 @@
 import { format } from "date-fns";
 import { StockData, MOCK_FR_STOCKS, MOCK_US_STOCKS } from "./mock-data";
-import { StockQuote, TickerResult, SourceAttempt, RunLog, RunSummary } from "./sources/types";
+import {
+  StockQuote,
+  TickerResult,
+  SourceAttempt,
+  RunLog,
+  RunSummary,
+} from "./sources/types";
 import { getFinnhubSource } from "./sources/finnhub";
 import { yahooSource } from "./sources/yahoo";
 import { TickerDef } from "./sources/tickers";
 import { logConsole, appendRun, writeAlert } from "./logger";
+import { generateSparkline } from "./sparkline";
 
 // ---------------------------------------------------------------------------
 // Seuils de comparaison (voir ARCHITECTURE.md)
 // ---------------------------------------------------------------------------
 
-const ALERT_THRESHOLD_PCT    = 1.0;
+const ALERT_THRESHOLD_PCT = 1.0;
 const CRITICAL_THRESHOLD_PCT = 3.0;
 const HIGH_FAILURE_THRESHOLD = 0.4; // alerte si >40% des tickers échouent sur une source
 
@@ -21,14 +28,16 @@ const HIGH_FAILURE_THRESHOLD = 0.4; // alerte si >40% des tickers échouent sur 
 function makeMockStock(def: TickerDef): StockData {
   const mocks = def.market === "FR" ? MOCK_FR_STOCKS : MOCK_US_STOCKS;
   const found = mocks.find((m) => m.ticker === def.symbol.replace(/\.[A-Z]+$/, ""));
-  return found ?? {
-    ticker: def.symbol.replace(/\.[A-Z]+$/, ""),
-    name: def.name,
-    market: def.market,
-    price: 0,
-    change: 0,
-    reason: "Données indisponibles.",
-  };
+  return (
+    found ?? {
+      ticker: def.symbol.replace(/\.[A-Z]+$/, ""),
+      name: def.name,
+      market: def.market,
+      price: 0,
+      change: 0,
+      reason: "Données indisponibles.",
+    }
+  );
 }
 
 /** Durée en ms depuis t0 */
@@ -62,26 +71,29 @@ export async function fetchAllStocks(
 ): Promise<FetchResult> {
   const token = process.env.STOCK_API_KEY;
   const finnhub = token ? getFinnhubSource(token) : null;
-  const today   = format(new Date(), "yyyy-MM-dd");
+  const today = format(new Date(), "yyyy-MM-dd");
 
   const runId = `${trigger}-${today}-${format(new Date(), "HH-mm")}`;
 
-  logConsole({ type: "fetch_start", message: `Starting run ${runId} for ${tickers.length} tickers` });
+  logConsole({
+    type: "fetch_start",
+    message: `Starting run ${runId} for ${tickers.length} tickers`,
+  });
 
   // Résultats par ticker (indexés par symbol pour accès rapide)
   const tickerResults = new Map<string, TickerResult>();
 
   // Quotes récupérées (pour cross-check ensuite)
   const finnhubQuotes = new Map<string, StockQuote>();
-  const yahooQuotes   = new Map<string, StockQuote>();
+  const yahooQuotes = new Map<string, StockQuote>();
 
   // ---------------------------------------------------------------------------
   // Étape 1 : Finnhub (pour tous les tickers où canFetch() = true)
   // ---------------------------------------------------------------------------
 
   let finnhubSuccesses = 0;
-  let finnhubFailures  = 0;
-  let finnhubSkipped   = 0;
+  let finnhubFailures = 0;
+  let finnhubSkipped = 0;
 
   for (const def of tickers) {
     const attempt: SourceAttempt = { status: "skipped" };
@@ -90,23 +102,33 @@ export async function fetchAllStocks(
       // Pas de clé ou symbole EU → skip silencieux
       attempt.status = "skipped";
       finnhubSkipped++;
-      logConsole({ type: "skip", symbol: def.symbol, source: "finnhub",
-        reason: finnhub ? "EU suffix not covered by free plan" : "no API key" });
+      logConsole({
+        type: "skip",
+        symbol: def.symbol,
+        source: "finnhub",
+        reason: finnhub ? "EU suffix not covered by free plan" : "no API key",
+      });
     } else {
       const t0 = Date.now();
       try {
         const quote = await finnhub.fetchQuote(def.symbol);
         const ms = elapsed(t0);
-        attempt.status  = "ok";
-        attempt.price   = quote.price;
+        attempt.status = "ok";
+        attempt.price = quote.price;
         attempt.latency_ms = ms;
         finnhubSuccesses++;
         finnhubQuotes.set(def.symbol, quote);
-        logConsole({ type: "ok", symbol: def.symbol, source: "finnhub", price: quote.price, latency_ms: ms });
+        logConsole({
+          type: "ok",
+          symbol: def.symbol,
+          source: "finnhub",
+          price: quote.price,
+          latency_ms: ms,
+        });
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         attempt.status = "error";
-        attempt.error  = msg;
+        attempt.error = msg;
         finnhubFailures++;
         logConsole({ type: "fail", symbol: def.symbol, source: "finnhub", error: msg });
       }
@@ -115,17 +137,20 @@ export async function fetchAllStocks(
     tickerResults.set(def.symbol, {
       symbol: def.symbol,
       market: def.market,
-      final_source: "mock",   // sera mis à jour plus bas
-      final_price:  0,
+      final_source: "mock", // sera mis à jour plus bas
+      final_price: 0,
       finnhub: attempt,
-      yahoo:   { status: "skipped" },
+      yahoo: { status: "skipped" },
       comparison: null,
     });
   }
 
   // Alerte si taux d'échec Finnhub élevé (sur les tickers qu'elle devait couvrir)
   const finnhubAttempted = finnhubSuccesses + finnhubFailures;
-  if (finnhubAttempted > 0 && finnhubFailures / finnhubAttempted > HIGH_FAILURE_THRESHOLD) {
+  if (
+    finnhubAttempted > 0 &&
+    finnhubFailures / finnhubAttempted > HIGH_FAILURE_THRESHOLD
+  ) {
     const msg = `${finnhubFailures}/${finnhubAttempted} tickers failed on Finnhub`;
     writeAlert("HIGH_FAILURE_RATE", msg);
     logConsole({ type: "alert", alertType: "HIGH_FAILURE_RATE", message: msg });
@@ -136,7 +161,7 @@ export async function fetchAllStocks(
   // ---------------------------------------------------------------------------
 
   let yahooFallbackSuccess = 0;
-  let yahooFallbackFailed  = 0;
+  let yahooFallbackFailed = 0;
 
   // Tickers à passer à Yahoo : ceux sans quote Finnhub valide
   const needsYahoo = tickers.filter((def) => !finnhubQuotes.has(def.symbol));
@@ -150,7 +175,13 @@ export async function fetchAllStocks(
       result.yahoo = { status: "ok", price: quote.price, latency_ms: ms };
       yahooFallbackSuccess++;
       yahooQuotes.set(def.symbol, quote);
-      logConsole({ type: "ok", symbol: def.symbol, source: "yahoo", price: quote.price, latency_ms: ms });
+      logConsole({
+        type: "ok",
+        symbol: def.symbol,
+        source: "yahoo",
+        price: quote.price,
+        latency_ms: ms,
+      });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       const result = tickerResults.get(def.symbol)!;
@@ -169,7 +200,7 @@ export async function fetchAllStocks(
     (def) => def.market === "US" && finnhubQuotes.has(def.symbol)
   );
 
-  let comparisons      = 0;
+  let comparisons = 0;
   let comparisonAlerts = 0;
 
   for (const def of usFinnhubOk) {
@@ -190,10 +221,10 @@ export async function fetchAllStocks(
       }
     }
 
-    const fhQuote  = finnhubQuotes.get(def.symbol)!;
-    const delta    = deltaPct(fhQuote.price, yahooQuote.price);
-    const isAlert  = delta > ALERT_THRESHOLD_PCT;
-    const isCrit   = delta > CRITICAL_THRESHOLD_PCT;
+    const fhQuote = finnhubQuotes.get(def.symbol)!;
+    const delta = deltaPct(fhQuote.price, yahooQuote.price);
+    const isAlert = delta > ALERT_THRESHOLD_PCT;
+    const isCrit = delta > CRITICAL_THRESHOLD_PCT;
 
     comparisons++;
     if (isAlert) comparisonAlerts++;
@@ -219,7 +250,7 @@ export async function fetchAllStocks(
   const stocks: StockData[] = [];
 
   for (const def of tickers) {
-    const result  = tickerResults.get(def.symbol)!;
+    const result = tickerResults.get(def.symbol)!;
     const fhQuote = finnhubQuotes.get(def.symbol);
     const yfQuote = yahooQuotes.get(def.symbol);
 
@@ -229,31 +260,42 @@ export async function fetchAllStocks(
 
     if (fhQuote) {
       finalSource = "finnhub";
-      finalPrice  = fhQuote.price;
+      finalPrice = fhQuote.price;
       finalChange = fhQuote.changePercent;
     } else if (yfQuote) {
       finalSource = "yahoo";
-      finalPrice  = yfQuote.price;
+      finalPrice = yfQuote.price;
       finalChange = yfQuote.changePercent;
     } else {
       finalSource = "mock";
-      const mock  = makeMockStock(def);
-      finalPrice  = mock.price;
+      const mock = makeMockStock(def);
+      finalPrice = mock.price;
       finalChange = mock.change;
       mockUsed++;
     }
 
     result.final_source = finalSource;
-    result.final_price  = finalPrice;
+    result.final_price = finalPrice;
+
+    const ticker = def.symbol.replace(/\.[A-Z]+$/, "");
+
+    // Série réelle si Yahoo a répondu, sinon série générée cohérente avec la
+    // variation. Jamais bloquant : fetchSparkline ne lève pas.
+    const realSeries = await yahooSource.fetchSparkline(def.symbol);
+    const sparkline =
+      realSeries.length >= 2
+        ? realSeries
+        : generateSparkline(ticker, finalPrice, finalChange);
 
     // La raison sera construite dans lib/stocks.ts (Option A)
     stocks.push({
-      ticker: def.symbol.replace(/\.[A-Z]+$/, ""),
-      name:   def.name,
+      ticker,
+      name: def.name,
       market: def.market,
-      price:  finalPrice,
+      price: finalPrice,
       change: finalChange,
-      reason: "",   // placeholder — rempli par stocks.ts
+      reason: "", // placeholder — rempli par stocks.ts
+      sparkline,
     });
   }
 
@@ -262,20 +304,20 @@ export async function fetchAllStocks(
   // ---------------------------------------------------------------------------
 
   const summary: RunSummary = {
-    total_tickers:          tickers.length,
-    finnhub_success:        finnhubSuccesses,
-    finnhub_failed:         finnhubFailures,
-    finnhub_skipped:        finnhubSkipped,
+    total_tickers: tickers.length,
+    finnhub_success: finnhubSuccesses,
+    finnhub_failed: finnhubFailures,
+    finnhub_skipped: finnhubSkipped,
     yahoo_fallback_success: yahooFallbackSuccess,
-    yahoo_fallback_failed:  yahooFallbackFailed,
-    mock_used:              mockUsed,
-    comparisons_done:       comparisons,
-    comparisons_alerts:     comparisonAlerts,
+    yahoo_fallback_failed: yahooFallbackFailed,
+    mock_used: mockUsed,
+    comparisons_done: comparisons,
+    comparisons_alerts: comparisonAlerts,
   };
 
   const runLog: RunLog = {
     timestamp: new Date().toISOString(),
-    run_id:    runId,
+    run_id: runId,
     trigger,
     summary,
     tickers: Array.from(tickerResults.values()),

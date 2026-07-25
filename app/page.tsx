@@ -3,16 +3,30 @@ import { MarketSection } from "@/components/MarketSection";
 import { EveningRecap } from "@/components/EveningRecap";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { SiteFooter } from "@/components/SiteFooter";
-import { MOCK_FR_STOCKS, MOCK_US_STOCKS, MOCK_EVENING_SUMMARY, type StockData } from "@/lib/mock-data";
+import {
+  MOCK_FR_STOCKS,
+  MOCK_US_STOCKS,
+  MOCK_EVENING_SUMMARY,
+  type StockData,
+} from "@/lib/mock-data";
+import { generateSparkline, withSparklines } from "@/lib/sparkline";
 import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
 
 export const dynamic = "force-dynamic";
 
 function toStockData(s: {
-  ticker: string; name: string; market: string; price: number;
-  change: number; reason: string; preMarket?: number | null; volume?: number | null;
+  ticker: string;
+  name: string;
+  market: string;
+  price: number;
+  change: number;
+  reason: string;
+  preMarket?: number | null;
+  volume?: number | null;
+  sparkline?: number[] | null;
 }): StockData {
+  const stored = s.sparkline ?? [];
   return {
     ticker: s.ticker,
     name: s.name,
@@ -22,6 +36,10 @@ function toStockData(s: {
     reason: s.reason,
     preMarket: s.preMarket ?? undefined,
     volume: s.volume ?? undefined,
+    // Les briefs enregistrés avant l'ajout de la colonne n'ont pas de série :
+    // on en génère une plutôt que d'afficher une carte amputée.
+    sparkline:
+      stored.length >= 2 ? stored : generateSparkline(s.ticker, s.price, s.change),
   };
 }
 
@@ -59,17 +77,22 @@ export default async function HomePage() {
 
   const frStocks: StockData[] = morning
     ? morning.stocks.filter((s) => s.market === "FR").map(toStockData)
-    : MOCK_FR_STOCKS;
+    : withSparklines(MOCK_FR_STOCKS);
   const usStocks: StockData[] = morning
     ? morning.stocks.filter((s) => s.market === "US").map(toStockData)
-    : MOCK_US_STOCKS;
+    : withSparklines(MOCK_US_STOCKS);
 
   const nowParis = new Date(
     new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" })
   );
   const showEveningSection = nowParis.getHours() >= 18;
 
-  let eveningData: { frStocks: StockData[]; usStocks: StockData[]; summary: string; isYesterday: boolean } | null = null;
+  let eveningData: {
+    frStocks: StockData[];
+    usStocks: StockData[];
+    summary: string;
+    isYesterday: boolean;
+  } | null = null;
 
   if (showEveningSection) {
     if (evening) {
@@ -80,19 +103,33 @@ export default async function HomePage() {
         isYesterday: false,
       };
     } else {
-      eveningData = { frStocks, usStocks, summary: MOCK_EVENING_SUMMARY, isYesterday: false };
+      eveningData = {
+        frStocks,
+        usStocks,
+        summary: MOCK_EVENING_SUMMARY,
+        isYesterday: false,
+      };
     }
   } else {
     const yesterdayEvening = await getYesterdayEvening();
     if (yesterdayEvening) {
       eveningData = {
-        frStocks: yesterdayEvening.stocks.filter((s) => s.market === "FR").map(toStockData),
-        usStocks: yesterdayEvening.stocks.filter((s) => s.market === "US").map(toStockData),
+        frStocks: yesterdayEvening.stocks
+          .filter((s) => s.market === "FR")
+          .map(toStockData),
+        usStocks: yesterdayEvening.stocks
+          .filter((s) => s.market === "US")
+          .map(toStockData),
         summary: yesterdayEvening.summary ?? MOCK_EVENING_SUMMARY,
         isYesterday: true,
       };
     } else {
-      eveningData = { frStocks, usStocks, summary: MOCK_EVENING_SUMMARY, isYesterday: true };
+      eveningData = {
+        frStocks,
+        usStocks,
+        summary: MOCK_EVENING_SUMMARY,
+        isYesterday: true,
+      };
     }
   }
 
