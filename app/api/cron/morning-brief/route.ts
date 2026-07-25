@@ -3,9 +3,12 @@ import { getMorningStocks } from "@/lib/stocks";
 import { sendMorningBrief } from "@/lib/email";
 import { format } from "date-fns";
 import { isAuthorized, unauthorized } from "@/lib/auth";
+import { logCronStart } from "@/lib/cron-schedule";
 
 export async function GET(request: Request) {
   if (!isAuthorized(request)) return unauthorized();
+
+  logCronStart("morning-brief");
 
   const today = format(new Date(), "yyyy-MM-dd");
 

@@ -68,7 +68,39 @@ curl -H "Authorization: Bearer dev-secret" http://localhost:3000/api/cron/evenin
 2. Importez le projet sur vercel.com
 3. Ajoutez les variables d'environnement dans les settings Vercel
 4. Pour la production, migrez vers **Turso** (LibSQL) ou **Neon** (PostgreSQL)
-5. Les crons sont configurés dans `vercel.json` (lundi–vendredi, 8h et 22h30 Paris)
+5. Les crons sont configurés dans `vercel.json` (lundi–vendredi) — voir ci-dessous
+
+## Crons et fuseau horaire
+
+**Vercel n'accepte que des expressions cron en UTC.** Il n'existe aucun moyen
+d'y déclarer `Europe/Paris`. Une heure UTC fixe correspond donc à deux heures
+de Paris différentes selon la saison :
+
+| Cron | `vercel.json` (UTC) | Heure de Paris visée | Été (CEST, UTC+2) | Hiver (CET, UTC+1) |
+|---|---|---|---|---|
+| `morning-brief` | `0 6 * * 1-5` | 08:00 | **08:00** ✅ | 07:00 ⚠️ |
+| `evening-recap` | `30 20 * * 1-5` | 22:30 | **22:30** ✅ | 21:30 ⚠️ |
+
+Les valeurs actuelles sont calées sur **l'heure d'été**. Du dernier dimanche
+d'octobre au dernier dimanche de mars, les deux crons partent **une heure trop
+tôt**.
+
+Pour recaler l'hiver, décaler les deux schedules d'une heure : `0 7 * * 1-5` et
+`30 21 * * 1-5`. Il faut le faire manuellement deux fois par an — c'est le prix
+de l'absence de fuseau côté Vercel.
+
+Chaque route cron appelle `logCronStart()` (`lib/cron-schedule.ts`) au
+démarrage. Elle log l'heure de Paris effective et émet un `console.warn` quand
+le schedule UTC ne tombe plus sur l'heure visée :
+
+```
+[CRON] morning-brief — démarrage 25/07/2026 08:03 (Europe/Paris, UTC+2, heure d'été)
+[CRON] morning-brief — DÉCALAGE : "0 6 * * 1-5" UTC tombe à 07:00 Paris, la cible est 08:00. Corriger vercel.json (voir README).
+```
+
+> ⚠️ Sur le plan Hobby, Vercel s'autorise en plus une fenêtre de tolérance d'une
+> heure sur l'heure d'exécution réelle. Le log ci-dessus reflète l'heure de
+> déclenchement effective, pas l'heure théorique.
 
 ## Disclaimer
 
