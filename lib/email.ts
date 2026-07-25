@@ -1,3 +1,4 @@
+import { Resend } from "resend";
 import { StockData } from "./mock-data";
 import { AMF_DISCLAIMER } from "./legal";
 import { buildUnsubscribeUrl } from "./unsubscribe";
@@ -5,10 +6,96 @@ import { buildUnsubscribeUrl } from "./unsubscribe";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 const FROM = "StockRadar <briefing@stockradar.fr>";
 
-function getResend() {
-  if (!process.env.RESEND_API_KEY) return null;
-  const { Resend } = require("resend");
-  return new Resend(process.env.RESEND_API_KEY) as import("resend").Resend;
+/**
+ * Levée quand une clé d'API requise pour envoyer est absente.
+ *
+ * Auparavant `getResend()` renvoyait `null` et les fonctions d'envoi
+ * retournaient sans rien faire : les crons concluaient `success: true` sans
+ * qu'un seul email parte. Une configuration incomplète est une panne, elle
+ * doit remonter.
+ */
+export class MissingApiKeyError extends Error {
+  readonly variable: string;
+
+  constructor(variable: string) {
+    super(`${variable} absente — aucun email ne peut être envoyé.`);
+    this.name = "MissingApiKeyError";
+    this.variable = variable;
+  }
+}
+
+/** Levée quand l'API Resend refuse un envoi unitaire. */
+export class EmailSendError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "EmailSendError";
+  }
+}
+
+/** Compte-rendu d'une campagne d'envoi. Sans adresse : voir ARCHITECTURE.md (pas de PII dans les logs). */
+export interface SendSummary {
+  /** Destinataires que l'on a tenté de joindre. */
+  targeted: number;
+  sent: number;
+  failed: number;
+  /** Messages d'erreur distincts, sans adresse email. */
+  errors: string[];
+}
+
+function emptySummary(targeted: number): SendSummary {
+  return { targeted, sent: 0, failed: 0, errors: [] };
+}
+
+function getResend(): Resend {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) throw new MissingApiKeyError("RESEND_API_KEY");
+  return new Resend(key);
+}
+
+/**
+ * Envoie un lot et compte les succès et les échecs, sans jamais logger d'adresse.
+ *
+ * ⚠️ `resend.emails.send()` ne rejette pas quand l'API refuse l'envoi : elle
+ * résout avec `{ data: null, error: {...} }`. Quota dépassé, clé invalide,
+ * domaine d'expédition non vérifié — tout ça passait pour un succès. Le retour
+ * doit être inspecté, un try/catch seul ne suffit pas.
+ */
+async function sendBatch(
+  emails: string[],
+  build: (email: string) => { subject: string; html: string }
+): Promise<SendSummary> {
+  const summary = emptySummary(emails.length);
+  if (emails.length === 0) return summary;
+
+  // Lève si la clé manque : l'appelant décide quoi en faire.
+  const resend = getResend();
+
+  for (const email of emails) {
+    const { subject, html } = build(email);
+    try {
+      const result = await resend.emails.send({
+        from: FROM,
+        to: email,
+        subject,
+        html,
+      });
+
+      if (result?.error) {
+        recordFailure(summary, `${result.error.name}: ${result.error.message}`);
+      } else {
+        summary.sent++;
+      }
+    } catch (err) {
+      recordFailure(summary, err instanceof Error ? err.message : String(err));
+    }
+  }
+
+  return summary;
+}
+
+function recordFailure(summary: SendSummary, message: string): void {
+  summary.failed++;
+  if (!summary.errors.includes(message)) summary.errors.push(message);
 }
 
 function stockRowHtml(s: StockData): string {
@@ -65,11 +152,15 @@ function baseTemplate(previewText: string, content: string, unsubToken: string):
 </html>`;
 }
 
+/**
+ * Lève MissingApiKeyError si RESEND_API_KEY est absente, et EmailSendError si
+ * l'API refuse l'envoi. Sans ce message, le double opt-in ne peut pas aboutir :
+ * l'échec doit remonter à l'appelant.
+ */
 export async function sendConfirmationEmail(email: string, token: string) {
   const resend = getResend();
-  if (!resend) return;
   const link = `${APP_URL}/api/confirm?token=${token}`;
-  await resend.emails.send({
+  const result = await resend.emails.send({
     from: FROM,
     to: email,
     subject: "Confirmez votre inscription — StockRadar",
@@ -83,6 +174,12 @@ export async function sendConfirmationEmail(email: string, token: string) {
       token
     ),
   });
+
+  if (result?.error) {
+    throw new EmailSendError(
+      `${result.error.name}: ${result.error.message}`
+    );
+  }
 }
 
 /** Rend le HTML du briefing matinal. Extrait de l'envoi pour être testable. */
@@ -109,30 +206,18 @@ export function renderMorningBrief(
   );
 }
 
+/** Lève MissingApiKeyError si RESEND_API_KEY est absente et qu'il y a des destinataires. */
 export async function sendMorningBrief(
   emails: string[],
   tokens: Map<string, string>,
   date: string,
   frStocks: StockData[],
   usStocks: StockData[]
-) {
-  const resend = getResend();
-  if (!resend) return;
-
-  for (const email of emails) {
-    const html = renderMorningBrief(
-      date,
-      frStocks,
-      usStocks,
-      tokens.get(email) ?? ""
-    );
-    await resend.emails.send({
-      from: FROM,
-      to: email,
-      subject: `StockRadar — Briefing matinal ${date}`,
-      html,
-    });
-  }
+): Promise<SendSummary> {
+  return sendBatch(emails, (email) => ({
+    subject: `StockRadar — Briefing matinal ${date}`,
+    html: renderMorningBrief(date, frStocks, usStocks, tokens.get(email) ?? ""),
+  }));
 }
 
 /** Rend le HTML du compte-rendu du soir. Extrait de l'envoi pour être testable. */
@@ -163,6 +248,7 @@ export function renderEveningRecap(
   );
 }
 
+/** Lève MissingApiKeyError si RESEND_API_KEY est absente et qu'il y a des destinataires. */
 export async function sendEveningRecap(
   emails: string[],
   tokens: Map<string, string>,
@@ -170,23 +256,15 @@ export async function sendEveningRecap(
   frStocks: StockData[],
   usStocks: StockData[],
   summary: string
-) {
-  const resend = getResend();
-  if (!resend) return;
-
-  for (const email of emails) {
-    const html = renderEveningRecap(
+): Promise<SendSummary> {
+  return sendBatch(emails, (email) => ({
+    subject: `StockRadar — Compte-rendu ${date}`,
+    html: renderEveningRecap(
       date,
       frStocks,
       usStocks,
       summary,
       tokens.get(email) ?? ""
-    );
-    await resend.emails.send({
-      from: FROM,
-      to: email,
-      subject: `StockRadar — Compte-rendu ${date}`,
-      html,
-    });
-  }
+    ),
+  }));
 }
