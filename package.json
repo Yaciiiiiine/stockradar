@@ -3,7 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/guard-dev-db.mjs",
     "dev": "next dev",
+    "db:up": "docker start stockradar-pg 2>/dev/null || docker run -d --name stockradar-pg -e POSTGRES_USER=stockradar -e POSTGRES_PASSWORD=stockradar -e POSTGRES_DB=stockradar -p 55432:5432 --restart unless-stopped postgres:16-alpine",
+    "db:down": "docker stop stockradar-pg",
+    "db:migrate": "node scripts/guard-dev-db.mjs && prisma migrate dev",
+    "db:reset": "node scripts/guard-dev-db.mjs && prisma migrate reset",
     "build": "prisma generate && next build",
     "start": "next start",
     "test": "vitest run",
