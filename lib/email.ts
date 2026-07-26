@@ -4,7 +4,25 @@ import { AMF_DISCLAIMER } from "./legal";
 import { buildUnsubscribeUrl } from "./unsubscribe";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-const FROM = "StockRadar <briefing@stockradar.fr>";
+
+/**
+ * Expéditeur des emails.
+ *
+ * ⚠️ `stockradar.fr` n'est pas un domaine vérifié chez Resend — il n'est même
+ * pas enregistré. Resend refuse en 403 tout envoi depuis un domaine qu'on ne
+ * lui a pas prouvé, donc l'ancienne valeur `briefing@stockradar.fr` aurait
+ * échoué à chaque envoi, y compris une fois RESEND_API_KEY posée.
+ *
+ * `onboarding@resend.dev` est le domaine de test fourni par Resend. Il
+ * fonctionne sans vérification, mais n'autorise l'envoi que vers l'adresse du
+ * titulaire du compte Resend — suffisant pour valider la chaîne, pas pour
+ * diffuser la newsletter.
+ *
+ * Pour envoyer à de vrais abonnés : vérifier un domaine sur resend.com
+ * (enregistrements DNS), puis remettre une adresse de ce domaine ici.
+ * Voir docs/BLOCKERS.md.
+ */
+const FROM = "StockRadar <onboarding@resend.dev>";
 
 /**
  * Levée quand une clé d'API requise pour envoyer est absente.
