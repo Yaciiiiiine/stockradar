@@ -15,6 +15,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "audit:project": "node scripts/audit-project.mjs",
+    "bundle-size": "node scripts/bundle-size.mjs",
     "stats": "node scripts/stats.mjs",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
